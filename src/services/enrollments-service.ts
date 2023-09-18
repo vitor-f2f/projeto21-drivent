@@ -13,23 +13,25 @@ type ShortAddress = {
 }
 
 async function getAddressFromCEP(cep: string): Promise<ShortAddress> {
-  // FIXME: está com CEP fixo!
   const result = await request.get(`${process.env.VIA_CEP_API}/${cep}/json/`);
-  console.log(result.data);
-  const shortAddress: ShortAddress = {
+  if (result.data.erro) {
+    throw invalidDataError("CEP inexistente.");
+  }
+
+  const address: ShortAddress = {
     logradouro: result.data.logradouro,
     complemento: result.data.complemento,
     bairro: result.data.bairro,
     cidade: result.data.localidade,
     uf: result.data.uf
-}
-  return shortAddress;
+  }
+  return address;
 }
 
 async function getOneWithAddressByUserId(userId: number): Promise<GetOneWithAddressByUserIdResult> {
   const enrollmentWithAddress = await enrollmentRepository.findWithAddressByUserId(userId);
 
-  if (!enrollmentWithAddress) throw notFoundError();
+  if (!enrollmentWithAddress) throw invalidDataError("Inscrição não possui endereço.");
 
   const [firstAddress] = enrollmentWithAddress.Address;
   const address = getFirstAddress(firstAddress);
@@ -55,7 +57,7 @@ async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollm
   enrollment.birthday = new Date(enrollment.birthday);
   const address = getAddressForUpsert(params.address);
 
-    // TODO - Verificar se o CEP é válido antes de associar ao enrollment.
+  await getAddressFromCEP(params.address.cep);
 
   const newEnrollment = await enrollmentRepository.upsert(params.userId, enrollment, exclude(enrollment, 'userId'));
 
