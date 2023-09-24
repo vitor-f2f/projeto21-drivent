@@ -2,7 +2,7 @@ import { Response } from 'express';
 import httpStatus from 'http-status';
 import { AuthenticatedRequest } from '@/middlewares';
 import { enrollmentsService } from '@/services';
-import { invalidDataError } from '@/errors';
+import { CEP } from '@/protocols';
 
 export async function getEnrollmentByUser(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
@@ -21,20 +21,9 @@ export async function postCreateOrUpdateEnrollment(req: AuthenticatedRequest, re
   return res.sendStatus(httpStatus.OK);
 }
 
-type ShortAddress = {
-    logradouro: string;
-    complemento: string;
-    bairro: string;
-    cidade: string;
-    uf: string;
-}
-
 export async function getAddressFromCEP(req: AuthenticatedRequest, res: Response) {
-  const cep: string | undefined = req.query.cep as string;
+  const { cep } = req.query as CEP;
 
-  if(!cep || !/^\d{8}$/.test(cep)) {
-    throw invalidDataError("Formato inválido de CEP");
-  }
-  const address: ShortAddress = await enrollmentsService.getAddressFromCEP(cep);
+  const address = await enrollmentsService.getAddressFromCEP(cep);
   res.status(httpStatus.OK).send(address);
 }
