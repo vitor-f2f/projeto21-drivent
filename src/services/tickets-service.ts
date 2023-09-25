@@ -9,6 +9,22 @@ async function getTypes(): Promise<TicketType[]> {
     return types;
 }
 
+async function getTicket(id: number): Promise<TicketResult> {
+    const ticket = await ticketsRepository.findTicket(id);
+    if (!ticket) throw notFoundError();
+    return ticket;
+}
+
+async function createTicket(userId: number, ticketType: number): Promise<Ticket> {
+    const ticket = await ticketsRepository.postTicket(userId, ticketType);
+    if (!ticket) throw notFoundError();
+    return ticket;
+}
+
+export type CreateTicketParams = {
+    ticketTypeId: number
+}
+
 type TicketResult = {
     id: number,
     status: 'RESERVED' | 'PAID'
@@ -27,13 +43,8 @@ type TicketResult = {
     updatedAt: Date,
 }
 
-async function getTicket(id: number): Promise<TicketResult> {
-    const ticket = await ticketsRepository.findTicket(id);
-    if (!ticket) throw notFoundError();
-    return ticket;
-}
-
 export const ticketsService = {
     getTypes,
-    getTicket
+    getTicket,
+    createTicket
 };

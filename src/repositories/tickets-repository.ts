@@ -11,7 +11,7 @@ async function findTicket(id: number) {
             userId: id
         }
     })
-    if (!enrollment) throw notFoundError();
+    if (!enrollment) return null;
 
     const ticket = await prisma.ticket.findFirst({
         where: {
@@ -22,7 +22,7 @@ async function findTicket(id: number) {
         }
     });
 
-    if (!ticket) throw notFoundError();
+    if (!ticket) return null;
 
     const result = {
         id: ticket.id,
@@ -43,7 +43,27 @@ async function findTicket(id: number) {
     };
     return result;
 }
+
+async function postTicket(userId: number, ticketType: number) {
+    const enrollment = await prisma.enrollment.findFirst({
+        where: {
+            userId: userId
+        }
+    })
+    if (!enrollment) return null;
+    const ticket = await prisma.ticket.create({
+        data: {
+            status: "RESERVED",
+            ticketTypeId: ticketType,
+            enrollmentId: enrollment.id
+        },
+        include: { TicketType: true }
+    })
+    return ticket;
+}
+
 export const ticketsRepository = {
     findTypes,
-    findTicket
+    findTicket,
+    postTicket
 };

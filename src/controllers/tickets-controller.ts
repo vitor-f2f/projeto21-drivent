@@ -16,26 +16,12 @@ export async function getUserTicket(req: AuthenticatedRequest, res: Response) {
     const ticket = await ticketsService.getTicket(userId);
     return res.status(httpStatus.OK).json(ticket);
 }
-// export async function getEnrollmentByUser(req: AuthenticatedRequest, res: Response) {
-//   const { userId } = req;
 
-//   const enrollmentWithAddress = await enrollmentsService.getOneWithAddressByUserId(userId);
+export async function postUserTicket(req: AuthenticatedRequest, res: Response) {
+    const { userId } = req;
+    const { ticketTypeId } = req.body;
 
-//   return res.status(httpStatus.OK).send(enrollmentWithAddress);
-// }
-
-// export async function postCreateOrUpdateEnrollment(req: AuthenticatedRequest, res: Response) {
-//   await enrollmentsService.createOrUpdateEnrollmentWithAddress({
-//     ...req.body,
-//     userId: req.userId,
-//   });
-
-//   return res.sendStatus(httpStatus.OK);
-// }
-
-// export async function getAddressFromCEP(req: AuthenticatedRequest, res: Response) {
-//   const { cep } = req.query as CEP;
-
-//   const address = await enrollmentsService.getAddressFromCEP(cep);
-//   res.status(httpStatus.OK).send(address);
-// }
+    const ticket = await ticketsService.createTicket(userId, ticketTypeId);
+    console.log(ticket);
+    return res.status(httpStatus.CREATED).json(ticket);
+}
