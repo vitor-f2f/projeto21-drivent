@@ -7,12 +7,15 @@ import { CEP } from '@/protocols';
 // getUserTickets, getTypes, postTicket
 
 export async function getEventTypes(req: AuthenticatedRequest, res: Response) {
-    console.log(req);
     const typeArray = await ticketsService.getTypes();
     return res.status(httpStatus.OK).json(typeArray);
 }
 
-
+export async function getUserTicket(req: AuthenticatedRequest, res: Response) {
+    const { userId } = req;
+    const ticket = await ticketsService.getTicket(userId);
+    return res.status(httpStatus.OK).json(ticket);
+}
 // export async function getEnrollmentByUser(req: AuthenticatedRequest, res: Response) {
 //   const { userId } = req;
 
