@@ -1,50 +1,41 @@
-import { Ticket, TicketType } from '@prisma/client';
-import dayjs from 'dayjs';
-import { notFoundError } from '@/errors';
-import { ticketsRepository } from '@/repositories';
-import { exclude } from '@/utils/prisma-utils';
+import { TicketStatus } from '@prisma/client';
+import { invalidDataError, notFoundError } from '@/errors';
+import { CreateTicketParams } from '@/protocols';
+import { enrollmentRepository, ticketsRepository } from '@/repositories';
 
-async function getTypes(): Promise<TicketType[]> {
-    const types = await ticketsRepository.findTypes();
-    return types;
+async function findTicketTypes() {
+  const ticketTypes = await ticketsRepository.findTicketTypes();
+  return ticketTypes;
 }
 
-async function getTicket(id: number): Promise<TicketResult> {
-    const ticket = await ticketsRepository.findTicket(id);
-    if (!ticket) throw notFoundError();
-    return ticket;
+async function getTicketByUserId(userId: number) {
+  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
+  if (!enrollment) throw notFoundError();
+
+  const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
+  if (!ticket) throw notFoundError();
+
+  return ticket;
 }
 
-async function createTicket(userId: number, ticketType: number): Promise<Ticket> {
-    const ticket = await ticketsRepository.postTicket(userId, ticketType);
-    if (!ticket) throw notFoundError();
-    return ticket;
-}
+async function createTicket(userId: number, ticketTypeId: number) {
+  if (!ticketTypeId) throw invalidDataError('ticketTypeId');
 
-export type CreateTicketParams = {
-    ticketTypeId: number
-}
+  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
+  if (!enrollment) throw notFoundError();
 
-type TicketResult = {
-    id: number,
-    status: 'RESERVED' | 'PAID'
-    ticketTypeId: number,
-    enrollmentId: number,
-    TicketType: {
-        id: number,
-        name: string,
-        price: number,
-        isRemote: boolean,
-        includesHotel: boolean,
-        createdAt: Date,
-        updatedAt: Date,
-    },
-    createdAt: Date,
-    updatedAt: Date,
+  const ticketData: CreateTicketParams = {
+    enrollmentId: enrollment.id,
+    ticketTypeId,
+    status: TicketStatus.RESERVED,
+  };
+
+  const ticket = await ticketsRepository.createTicket(ticketData);
+  return ticket;
 }
 
 export const ticketsService = {
-    getTypes,
-    getTicket,
-    createTicket
+  findTicketTypes,
+  getTicketByUserId,
+  createTicket,
 };
