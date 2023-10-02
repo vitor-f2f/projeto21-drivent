@@ -9,9 +9,9 @@ export async function getAllHotels(req: AuthenticatedRequest, res: Response) {
     return res.status(httpStatus.OK).send(hotels);
 }
 
-export async function getHotel(req: AuthenticatedRequest, res: Response) {
+export async function getHotelById(req: AuthenticatedRequest, res: Response) {
     const { userId } = req;
     const hotelId = parseInt(req.params.hotelId);
-    const ticket = await hotelsService.getHotelById(userId, hotelId);
-    res.status(httpStatus.OK).send(ticket);
+    const hotel = await hotelsService.getHotelById(userId, hotelId);
+    res.status(httpStatus.OK).send(hotel);
 }
