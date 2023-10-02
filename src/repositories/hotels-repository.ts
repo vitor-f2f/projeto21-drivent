@@ -12,8 +12,8 @@ async function findPaidEnrollment(userId: number) {
             },
         },
     });
-    if (!enrollment || !enrollment.Ticket || !enrollment.Ticket.TicketType.includesHotel) return null;
-    return enrollment.Ticket.status;
+    if (!enrollment || !enrollment.Ticket) return null;
+    return enrollment.Ticket;
 }
 
 async function findAllHotels() {
@@ -23,8 +23,13 @@ async function findAllHotels() {
 
 async function findHotelById(hotelId: number) {
     const result = await prisma.hotel.findUnique({
-        where: { id: hotelId }
+        where: { id: hotelId },
+        include: {
+            Rooms: true,
+        },
     });
+
+    if (!result) return null;
 
     return result;
 }
