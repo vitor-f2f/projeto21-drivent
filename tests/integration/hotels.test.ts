@@ -82,7 +82,6 @@ describe('GET /hotels', () => {
             await createTicket(enrollment.id, ticketType.id, 'PAID');
 
             const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
-            console.log(response.body);
             expect(response.status).toBe(httpStatus.NOT_FOUND);
         })
 
@@ -232,7 +231,6 @@ describe('GET /hotels/:hotelId', () => {
             await createRoom(hotel.id);
 
             const response = await server.get(`/hotels/${hotel.id}`).set('Authorization', `Bearer ${token}`);
-            console.log("body", response.body);
             expect(response.status).toBe(httpStatus.OK);
             expect(response.body).toEqual(
                 expect.objectContaining({
