@@ -22,7 +22,10 @@ async function getBooking(userId: number) {
     const booking = await bookingRepository.findBooking(userId);
     if (!booking) throw notFoundError();
 
-    return booking;
+    return {
+        id: booking.id,
+        Room: booking.Room
+    };
 }
 
 async function postBooking(userId: number, roomId: number) {
@@ -32,7 +35,10 @@ async function postBooking(userId: number, roomId: number) {
     if (!room || !roomId || isNaN(roomId)) throw notFoundError();
     if (room.Booking.length >= room.capacity) throw cannotBookRoomError();
 
-    return await bookingRepository.postBooking(userId, roomId);
+    const response = await bookingRepository.postBooking(userId, roomId);
+    return {
+        bookingId: response.id
+    }
 }
 
 async function updateBooking(userId: number, roomId: number, bookingId: number) {
@@ -42,7 +48,13 @@ async function updateBooking(userId: number, roomId: number, bookingId: number) 
     if (!room || !roomId || isNaN(roomId)) throw notFoundError();
     if (room.Booking.length >= room.capacity) throw cannotBookRoomError();
 
-    return await bookingRepository.updateBooking(bookingId, roomId);
+    const booking = await bookingRepository.checkBooking(userId, bookingId);
+    if (!booking) throw cannotBookRoomError();
+
+    const response = await bookingRepository.updateBooking(bookingId, roomId);
+    return {
+        bookingId: response.id
+    }
 }
 
 export const bookingService = {

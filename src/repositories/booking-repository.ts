@@ -22,6 +22,15 @@ async function checkRoom(roomId: number) {
     })
 }
 
+async function checkBooking(userId: number, bookingId: number) {
+    return await prisma.booking.findFirst({
+        where: {
+            id: bookingId,
+            userId: userId
+        }
+    })
+}
+
 async function postBooking(userId: number, roomId: number) {
     const result = await prisma.booking.create({
         data: {
@@ -49,5 +58,6 @@ export const bookingRepository = {
     updateBooking,
     postBooking,
     checkRoom,
+    checkBooking,
     findBooking
 };
